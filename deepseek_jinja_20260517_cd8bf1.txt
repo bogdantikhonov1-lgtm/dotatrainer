@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not session.user_id %}
+<div class="card">
+    <p>Чтобы тренироваться и сохранять прогресс, пожалуйста, войдите в аккаунт.</p>
+</div>
+{% else %}
+<div class="score">🏆 Правильных выборов: {{ stats.correct_attempts }} / {{ stats.total_attempts }}</div>
+<div class="card">
+    <div class="scenario-text">{{ scenario['description'] }}</div>
+    <div class="picks">
+        <div class="team"><h3>🤝 Союзники</h3>
+        <ul>{% for hero in scenario['allies'] %}<li>🟢 {{ hero }}</li>{% endfor %}</ul></div>
+        <div class="team"><h3>👿 Враги</h3>
+        <ul>{% for hero in scenario['enemies'] %}<li>🔴 {{ hero }}</li>{% endfor %}</ul></div>
+    </div>
+    <div class="role-badge">Твоя позиция: {{ scenario['position'] }}</div>
+    {% if not selected %}
+    <form method="POST">
+        <div class="options">
+        {% for opt in scenario['options'] %}
+            <button type="submit" name="choice" value="{{ opt }}" class="option-btn">{{ opt }}</button>
+        {% endfor %}
+        </div>
+    </form>
+    {% else %}
+    <div class="options">
+    {% for opt in scenario['options'] %}
+        <button class="option-btn" disabled
+            {% if opt == selected and opt == scenario['correct'] %}
+                style="background: #4ecca3;"
+            {% elif opt == selected and opt != scenario['correct'] %}
+                style="background: #e94560;"
+            {% elif opt == scenario['correct'] and selected != scenario['correct'] %}
+                style="background: #4ecca3; opacity: 0.7;"
+            {% endif %}
+        >{{ opt }}</button>
+    {% endfor %}
+    </div>
+    <div class="result">
+        {% if selected == scenario['correct'] %}
+            <p class="correct">✅ Верно! Отличный выбор.</p>
+        {% else %}
+            <p class="wrong">❌ Не лучший вариант. Правильный ответ: {{ scenario['correct'] }}</p>
+        {% endif %}
+        <div class="explanation">{{ scenario['explanation'] }}</div>
+    </div>
+    {% endif %}
+</div>
+<div class="nav">
+    <a href="{{ url_for('new_scenario') }}" class="new-scenario">🎲 Следующий сценарий</a>
+    <a href="{{ url_for('reset_score') }}" style="margin-left: 10px; color: #aaa;">Сбросить счёт</a>
+</div>
+{% endif %}
+{% endblock %}
